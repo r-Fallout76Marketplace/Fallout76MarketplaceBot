@@ -1,50 +1,39 @@
+import schedule
+
 import CONFIG
-import CONSTANTS
-import conversation
-import response
-import trade
-import trades_database
+from marketplace_database import MarketplaceDatabase
+from trello_blacklist import TrelloBlacklist
 
 # Only works in the subreddit mentioned in CONFIG
 subreddit = CONFIG.reddit.subreddit(CONFIG.subreddit_name)
 
-# Looks for this word
-plus_karma = "+Karma".capitalize()
-minus_karma = "-Karma"
+# Gets 100 historical comments
+comment_stream = subreddit.stream.comments(pause_after=-1, skip_existing=True)
+# Gets 100 historical submission
+submission_stream = subreddit.stream.submissions(pause_after=-1, skip_existing=True)
 
-# Create instance of trades database
-trades_database_object = trades_database.TradesDatabase()
+# Creating Trello Blacklist object
+blacklist = TrelloBlacklist()
+# Creating Marketplace Database object
+database = MarketplaceDatabase(blacklist)
 
-# Looks for comment in comments stream
-for comment in subreddit.stream.comments():
-    # Makes the comment body uppercase so we don't have to worry about case sensitivity
-    comment_body = comment.body.capitalize()
-    # If comment is +Karma
-    if plus_karma in comment_body:
-        # Creates object of class Conversation and Loads all the comments
-        conversation_object = conversation.Conversation(comment)
-        # Performs necessary checks
-        result = conversation_object.check_passed(comment)
 
-        has_occurred = False
-        if result == CONSTANTS.PASSED:
-            # Checks if trade has already happened
-            # The check needs to be done to make sure we don't have wrong data, otherwise comparison fails
-            has_occurred = trades_database_object.has_occurred(conversation_object)
+def refresh_memory():
+    print("Refresh")
+    database.delete_old_saved_items()
 
-        if result == CONSTANTS.PASSED and not has_occurred:
-            # If everything passes
-            response.check_passed(comment)
-            # Stores trade in database
-            tradeObject = trade.Trade(conversation_object)
-            trades_database_object.add_trade(tradeObject)
-        else:
-            # If checks fails
-            if has_occurred:
-                result = CONSTANTS.TRADE_ALREADY_OCCURRED
-            response.check_failed(result, comment)
-    # If comment is -Karma
-    elif minus_karma in comment_body:
-        print("TO:DO")
 
-    trades_database_object.export_trades()
+schedule.every(15).seconds.do(refresh_memory)
+
+while True:
+    schedule.run_pending()
+    # Gets comments and if it receives None, it switches to posts
+    for comment in comment_stream:
+        if comment is None:
+            break
+        database.load_comment(comment)
+    # Gets posts and if it receives None, it switches to comments
+    for submission in submission_stream:
+        if submission is None:
+            break
+        database.load_submission(submission)
