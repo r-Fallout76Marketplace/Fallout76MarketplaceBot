@@ -22,7 +22,8 @@ def dictionary_response(index, comment):
 def reply(comment_or_submission, body):
     response = body + "\n\n ^(This action was performed by a bot, please contact the mods for any questions.)"
     response = response + " ^(If you receive this more than once please ignore the comment.)"
-    comment_or_submission.reply(response)
+    new_comment = comment_or_submission.reply(response)
+    new_comment.mod.distinguish(how="yes")
 
 
 # Give the parent comment karma

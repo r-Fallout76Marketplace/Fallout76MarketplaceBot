@@ -1,6 +1,7 @@
 import re
-import praw
 import time
+
+import praw
 
 import CONFIG
 import CONSTANTS
@@ -37,7 +38,7 @@ class MarketplaceDatabase:
     # Loads the whole conversation thread from a comment and performs checks
     def load_comment(self, comment):
         # Ignore all Auto moderator comments
-        if comment.author.name == "AutoModerator":
+        if comment.author.name == "AutoModerator" or comment.author.name == CONFIG.username:
             return None
         # blacklist from searching comment text
         blacklist_comment = self.check_comment_in_blacklist(comment)
@@ -56,14 +57,17 @@ class MarketplaceDatabase:
     # Checks if the user is in blacklist
     def load_submission(self, submission):
         if not self.is_mod(submission.author):
-            blacklist = self.check_author_in_blacklist(submission)
-            response.comment_blacklist_search_result(submission.author.name, blacklist, submission)
-        regex = re.compile('XB1|PS4|PC', re.IGNORECASE)
-        submission_flair_text = submission.link_flair_text
-        match = re.match(regex, submission_flair_text)
-        # If No match found match is None
-        if match is not None:
-            submission.save()
+            regex = re.compile('XB1|PS4|PC', re.IGNORECASE)
+            submission_flair_text = submission.link_flair_text
+            match = re.match(regex, submission_flair_text)
+            # If No match found match is None
+            if match is not None:
+                blacklist = self.check_author_in_blacklist(submission)
+                response.comment_blacklist_search_result(submission.author.name, blacklist, submission)
+                try:
+                    submission.save()
+                except Exception:
+                    print("Error: Couldn't save the submission")
 
     # Checks the blacklist for keywords that appear in comment
     def check_comment_in_blacklist(self, comment):
@@ -107,4 +111,3 @@ class MarketplaceDatabase:
                         saved.locked()
                         response.close_submission_comment(saved)
                         saved.unsave()
-
