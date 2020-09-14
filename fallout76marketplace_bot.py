@@ -23,7 +23,7 @@ def refresh_memory():
     database.delete_old_saved_items()
 
 
-schedule.every(15).seconds.do(refresh_memory)
+schedule.every(1).days.do(refresh_memory)
 
 while True:
     schedule.run_pending()
