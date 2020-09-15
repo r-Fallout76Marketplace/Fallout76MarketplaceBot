@@ -88,10 +88,10 @@ def comment_blacklist_search_result(username, blacklist, comment_or_submission):
         response_text = response_text + "If \"-all\" is used then the results maybe false positive. Please check " \
                                         "each link to verify. "
     else:
-        response_text = "The bot has performed a preliminary search and has determined that the *" + username.lower() + "* is not "
-        response_text = response_text + "in present in Market76 or our blacklist. Please take precautions if the user account is "
-        response_text = response_text + "relatively new *(typically less than a month)* or has low trade karma. You may also check "
-        response_text = response_text + "their gamertag using the bot command *(See example in Automoderator comment)*. "
-        response_text = response_text + "If you are doing a high value trade, consider using an official courier. You can find links "
-        response_text = response_text + "to all couriers in the subreddit wiki."
+        response_text = "The bot has performed a preliminary search and has determined that the user *\"" + username.lower() + "\"* is not "
+        response_text = response_text + "in present in Market76 or our blacklist.\n\n^(Please take precautions if the user account is "
+        response_text = response_text + "very new or has low trade karma. You may also check their gamertag using the bot command "
+        response_text = response_text + "(See example in Automoderator comment\).) "
+        response_text = response_text + "^(If you are doing a high value trade, consider using an official courier. You can find links "
+        response_text = response_text + "to all couriers in the subreddit wiki or sidebar.)"
     reply(comment_or_submission, response_text)
