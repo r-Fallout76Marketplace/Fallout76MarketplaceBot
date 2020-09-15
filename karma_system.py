@@ -13,7 +13,7 @@ def submission_flair_checks(comment):
     regex = re.compile('XB1|PS4|PC', re.IGNORECASE)
     submission = comment.submission
     submission_flair_text = submission.link_flair_text
-    match = re.match(regex, submission_flair_text)
+    match = re.match(regex, str(submission_flair_text))
     # If No match found match is None
     if match is None:
         return False

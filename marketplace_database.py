@@ -38,7 +38,7 @@ class MarketplaceDatabase:
     # Loads the whole conversation thread from a comment and performs checks
     def load_comment(self, comment):
         # Ignore all Auto moderator comments
-        if comment.author.name == "AutoModerator" or comment.author.name == CONFIG.username:
+        if comment.author.name == "AutoModerator":
             return None
         # blacklist from searching comment text
         blacklist_comment = self.check_comment_in_blacklist(comment)
@@ -59,7 +59,7 @@ class MarketplaceDatabase:
         if not self.is_mod(submission.author):
             regex = re.compile('XB1|PS4|PC', re.IGNORECASE)
             submission_flair_text = submission.link_flair_text
-            match = re.match(regex, submission_flair_text)
+            match = re.match(regex, str(submission_flair_text))
             # If No match found match is None
             if match is not None:
                 blacklist = self.check_author_in_blacklist(submission)
@@ -104,10 +104,10 @@ class MarketplaceDatabase:
                 if saved.locked:
                     saved.unsave()
                 else:
-                    # If submission is week old, lock and delete it
+                    # If submission is 3 old, lock and delete it
                     now = time.time()
                     age = now - saved.created_utc
-                    if age >= 604800:
+                    if age >= 259200:
                         saved.locked()
                         response.close_submission_comment(saved)
                         saved.unsave()

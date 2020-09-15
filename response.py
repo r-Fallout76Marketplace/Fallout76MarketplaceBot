@@ -81,16 +81,15 @@ def close_submission_failed(comment, is_trading_post):
 def comment_blacklist_search_result(username, blacklist, comment_or_submission):
     response_text = "Error! Please message mods!"
     if len(blacklist) > 0:
-        response_text = "The user " + username + " has been found on blacklist " + str(len(blacklist))
+        response_text = "The user *" + username.lower() + "* has been found on blacklist " + str(len(blacklist))
         response_text = response_text + " time(s). The links for each time when the user appeared in blacklist are:\n\n"
         for item in blacklist:
             response_text = response_text + item.get('shortUrl') + "\n\n"
         response_text = response_text + "If \"-all\" is used then the results maybe false positive. Please check " \
                                         "each link to verify. "
     else:
-        response_text = "The user " + username + " is not in the blacklist. "
-        response_text = response_text + "However, this doesn\'t guarantee that the user is in clear. "
-        response_text = response_text + "Please refer the the user\'s previous posts in Fallout76 subreddits. "
-        response_text = response_text + "If the account is completely new, avoid doing big trades without using a " \
-                                        "verified courier. "
+        response_text = "The user *" + username.lower() + "* is not in the blacklist. "
+        response_text = response_text + "Please take precautions if the user account is relatively new or has low trade karma. "
+        response_text = response_text + "If you are doing a high value trade, consider using an official courier. You can find links "
+        response_text = response_text + "to all couriers in the subreddit wiki."
     reply(comment_or_submission, response_text)

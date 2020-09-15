@@ -1,4 +1,5 @@
 import schedule
+import traceback
 
 import CONFIG
 from marketplace_database import MarketplaceDatabase
@@ -25,15 +26,32 @@ def refresh_memory():
 
 schedule.every(1).days.do(refresh_memory)
 
+print("The bot has started running...")
+
 while True:
     schedule.run_pending()
     # Gets comments and if it receives None, it switches to posts
     for comment in comment_stream:
         if comment is None:
             break
-        database.load_comment(comment)
+        try: 
+            database.load_comment(comment)
+        except Exception:
+            # Sends a message to mods in case of error
+            tb = traceback.format_exc()
+            CONFIG.reddit.redditor("is_fake_Account").message(CONFIG.subreddit_name, tb, from_subreddit=CONFIG.subreddit_name)
+            print(tb)
+            
     # Gets posts and if it receives None, it switches to comments
     for submission in submission_stream:
         if submission is None:
             break
-        database.load_submission(submission)
+        try:
+            database.load_submission(submission)
+        except Exception:
+            # Sends a message to mods in case of error
+            tb = traceback.format_exc()
+            CONFIG.reddit.redditor("is_fake_Account").message(CONFIG.subreddit_name, tb, from_subreddit=CONFIG.subreddit_name)
+            print(tb)
+
+print("The bot has stopped...")
