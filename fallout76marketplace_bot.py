@@ -1,9 +1,9 @@
-import schedule
 import traceback
 
+import schedule
+
 import CONFIG
-from marketplace_database import MarketplaceDatabase
-from trello_blacklist import TrelloBlacklist
+import marketplace_database
 
 # Only works in the subreddit mentioned in CONFIG
 subreddit = CONFIG.reddit.subreddit(CONFIG.subreddit_name)
@@ -13,18 +13,22 @@ comment_stream = subreddit.stream.comments(pause_after=-1, skip_existing=True)
 # Gets 100 historical submission
 submission_stream = subreddit.stream.submissions(pause_after=-1, skip_existing=True)
 
-# Creating Trello Blacklist object
-blacklist = TrelloBlacklist()
 # Creating Marketplace Database object
-database = MarketplaceDatabase(blacklist)
+database = marketplace_database.MarketplaceDatabase()
 
 
 def refresh_memory():
-    print("Refresh")
-    database.delete_old_saved_items()
+    print("Deleting old items")
+    try:
+        marketplace_database.delete_old_saved_items(database)
+    except Exception:
+        tb = traceback.format_exc()
+        CONFIG.reddit.redditor("is_fake_Account").message(CONFIG.subreddit_name, tb,
+                                                          from_subreddit=CONFIG.subreddit_name)
+        print(tb)
 
 
-schedule.every(1).days.do(refresh_memory)
+schedule.every(3).hours.do(refresh_memory)
 
 print("The bot has started running...")
 
@@ -34,24 +38,24 @@ while True:
     for comment in comment_stream:
         if comment is None:
             break
-        try: 
-            database.load_comment(comment)
+        try:
+            marketplace_database.load_comment(comment, database)
         except Exception:
             # Sends a message to mods in case of error
             tb = traceback.format_exc()
-            CONFIG.reddit.redditor("is_fake_Account").message(CONFIG.subreddit_name, tb, from_subreddit=CONFIG.subreddit_name)
+            CONFIG.reddit.redditor("is_fake_Account").message(CONFIG.subreddit_name, tb,
+                                                              from_subreddit=CONFIG.subreddit_name)
             print(tb)
-            
+
     # Gets posts and if it receives None, it switches to comments
     for submission in submission_stream:
         if submission is None:
             break
         try:
-            database.load_submission(submission)
+            marketplace_database.load_submission(submission)
         except Exception:
             # Sends a message to mods in case of error
             tb = traceback.format_exc()
-            CONFIG.reddit.redditor("is_fake_Account").message(CONFIG.subreddit_name, tb, from_subreddit=CONFIG.subreddit_name)
+            CONFIG.reddit.redditor("is_fake_Account").message(CONFIG.subreddit_name, tb,
+                                                              from_subreddit=CONFIG.subreddit_name)
             print(tb)
-
-print("The bot has stopped...")

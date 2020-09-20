@@ -1,110 +1,74 @@
-from trello import TrelloApi
+import re
 
 import CONFIG
+import response
 
 
-def get_lists_ids(old_list):
-    new_list = list()
-    for element in old_list:
-        new_list.append(element.get('id'))
-    return new_list
-
-
-# searches the key in p_list and returns exact result
-def search_in_platform_list(key, p_list):
-    # Searches each card in list
-    for card in p_list:
-        # Splits the description
-        desc_list = (card.get('desc').upper()).split("\n")
-        # Compare each line in description
-        for line in desc_list:
-            # Skip empty and comment lines
-            if ":" not in line:
-                continue
-            if key == line[line.index(":") + len(":"):].strip():
-                return card
+# To extract the text from curly brackets
+def extract_frm_curly_brackets(input_text):
+    # Check for the curly braces
+    regex_extract = re.search(r"\{(.*)?\}", input_text)
+    if regex_extract is not None:
+        return regex_extract.group(1)
     return None
 
 
-# searches the key in p_list and returns all possible results
-def rough_search_in_platform_list(key, p_list):
-    result_list = list()
-    # Searches each card in list
-    for card in p_list:
-        # Splits the description
-        desc_list = (card.get('desc').upper()).split("\n")
-        # Compare each line in description
-        for line in desc_list:
-            # Skip empty and comment lines
-            if ":" not in line:
-                continue
-            # If line contains key
-            if key in line:
-                result_list.append(card)
-                break
-    return result_list
+# Checks the blacklist for keywords that appear in comment
+# or checks for the author of comment
+def check_comment_in_blacklist(comment):
+    output = extract_frm_curly_brackets(comment.body)
+    search_requested = True
+    # If there are no curly braces
+    if output is not None:
+        # Checks for the word enclosed in brackets if any
+        search_in_blacklist(output, search_requested, comment)
+    search_requested = False
+    partial_search = False
+    # checks for the author of the comment
+    search_in_blacklist(comment.author.name, search_requested, comment)
 
 
-# Class Trello
-# Stores all the information from Market76Blacklist Board
-# Also checks if a users is on blacklist
-class TrelloBlacklist:
-    def __init__(self):
-        # Set-up board api settings
-        self.trello = TrelloApi(CONFIG.TRELLO_APP_KEY)
-        self.market76_blacklist = self.trello.boards.get(CONFIG.MARKET76_BLACKLIST_BOARD_ID)
-        self.fallout76_marketplace_blacklist = self.trello.boards.get(CONFIG.FALLOUT76_MARKETPLACE_BOARD_ID)
-        # declaring lists
-        self.PC_list = list()
-        self.XBOX_list = list()
-        self.PS_list = list()
-        self.refresh_blacklist()
+# Check for the author of submission in blacklist
+def check_submission_in_blacklist(submission):
+    search_requested = False
+    search_in_blacklist(submission.author.name, search_requested, submission)
 
-    # Get all cards from list in trello
-    def get_cards(self, list_ids):
-        self.PC_list = self.PC_list + self.trello.lists.get_card(list_ids[0])
-        self.XBOX_list = self.XBOX_list + self.trello.lists.get_card(list_ids[1])
-        self.PS_list = self.PS_list + self.trello.lists.get_card(list_ids[2])
 
-    # Do a precise search in the trello board
-    def search_in_blacklist(self, search_query):
-        # If search query is empty
-        if len(search_query) <= 0:
-            return list()
-        self.refresh_blacklist()
-        black_list_result = list()
-        # Searches in all platforms
-        black_list_result.append(search_in_platform_list(search_query, self.PS_list))
-        black_list_result.append(search_in_platform_list(search_query, self.XBOX_list))
-        black_list_result.append(search_in_platform_list(search_query, self.PC_list))
-        # Removes if list contains None
-        black_list_result = list(filter(None, black_list_result))
-        return black_list_result
+# Checks if the search query is banned
+# e.g mods names and basic words
+def banned_query(search_query):
+    banned_words = ["byjiang", "jeranther"]
+    # Checks if search_query is in banned_word or banned word is part of it
+    for word in banned_words:
+        if word in search_query:
+            return True
+    # Check if search query is in moderator name
+    moderators_list = CONFIG.reddit.subreddit(CONFIG.subreddit_name).moderator()
+    for moderator in moderators_list:
+        if search_query in ('u/' + moderator.name).lower():
+            return True
+    return False
 
-    # Do a rough search in trello and return all possible results
-    def rough_search_in_blacklist(self, search_query):
-        # If search query is empty
-        if len(search_query) <= 0:
-            return list()
-        self.refresh_blacklist()
-        black_list_result = list()
-        # Searches in all platforms
-        black_list_result = black_list_result + rough_search_in_platform_list(search_query, self.PS_list)
-        black_list_result = black_list_result + rough_search_in_platform_list(search_query, self.XBOX_list)
-        black_list_result = black_list_result + rough_search_in_platform_list(search_query, self.PC_list)
-        return black_list_result
 
-    # Refresh the content captured from trello board
-    def refresh_blacklist(self):
-        # Emptying all lists
-        self.PC_list.clear()
-        self.XBOX_list.clear()
-        self.PS_list.clear()
-        # Get all lists content from Market76
-        market76_all_lists = self.trello.boards.get_list(CONFIG.MARKET76_BLACKLIST_BOARD_ID)
-        list_ids = get_lists_ids(market76_all_lists)
-        self.get_cards(list_ids)
-        # Get all lists content from Fallout76 Marketplace
-        fallout76_marketplace_all_lists = self.trello.boards.get_list(CONFIG.FALLOUT76_MARKETPLACE_BOARD_ID)
-        list_ids = get_lists_ids(fallout76_marketplace_all_lists)
-        self.get_cards(list_ids)
+# Removes the archived cards from list
+def delete_archived_cards(search_result):
+    for card in search_result:
+        if card.closed:
+            search_result.remove(card)
+    return search_result
+
+
+# Searches in trello board using trello api
+def search_in_blacklist(search_query, search_requested, comment_or_submission):
+    search_result = list()
+    if not banned_query(search_query.lower()):
+        search_result = CONFIG.trello_client.search(query=search_query, cards_limit=10)
+        search_result = delete_archived_cards(search_result)
+    # If nothing is returned by search result
+    if len(search_result) == 0:
+        # If search is requested only then the response is required
+        if search_requested:
+            response.comment_blacklist_search_result(search_query, search_result, comment_or_submission)
+    # If search result returns something
+    else:
+        response.comment_blacklist_search_result(search_query, search_result, comment_or_submission)
