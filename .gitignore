@@ -2,3 +2,4 @@ CONFIG.py
 __pycache__
 venv
 .idea
+awarder_db.txt

@@ -2,6 +2,8 @@ import traceback
 
 import schedule
 
+import time
+
 import CONFIG
 import marketplace_database
 
@@ -16,11 +18,20 @@ submission_stream = subreddit.stream.submissions(pause_after=-1, skip_existing=T
 # Creating Marketplace Database object
 database = marketplace_database.MarketplaceDatabase()
 
+# Read database file
+try:
+    awarder_db_file = open("awarder_db.txt", "r+")
+except IOError:
+    awarder_db_file = open("awarder_db.txt", "w+")
+lines = awarder_db_file.readlines()
+database.import_data(lines)
+
 
 def refresh_memory():
-    print("Deleting old items")
+    print("Deleting old items " + time.ctime())
     try:
         marketplace_database.delete_old_saved_items(database)
+        database.export_to_txt(awarder_db_file)
     except Exception:
         tb = traceback.format_exc()
         CONFIG.reddit.redditor("is_fake_Account").message(CONFIG.subreddit_name, tb,

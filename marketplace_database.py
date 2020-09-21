@@ -87,3 +87,16 @@ class MarketplaceDatabase:
         self.awarder_list.append(obj_awardee_awarder)
         self.awarder_list.sort(key=lambda awardee_awarder_l: awardee_awarder_l.awarder.name, reverse=True)
         return None
+
+    # import data from comment id to repopulate the list
+    def import_data(self, lines):
+        for line in lines:
+            comment = CONFIG.reddit.comment(line.strip()).refresh()
+            self.awarder_list.append(awardeeawarder.AwardeeAwarder(comment))
+        self.awarder_list.sort(key=lambda awardee_awarder_l: awardee_awarder_l.awarder.name, reverse=True)
+
+    # exporting all the comment IDs to a file so all comments can be imported again
+    def export_to_txt(self, awarder_db_file):
+        for awardee_awarder_list_obj in self.awarder_list:
+            awarder_db_file.write(awardee_awarder_list_obj.comment.id + "\n")
+
