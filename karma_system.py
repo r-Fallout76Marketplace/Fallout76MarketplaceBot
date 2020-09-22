@@ -101,7 +101,7 @@ def process_karma_pp(comment, database):
 def process_commands(comment, is_mod, database):
     if not is_mod:
         # If comment says Karma++
-        if CONSTANTS.KARMA_PP in comment.body.upper():
+        if re.search(CONSTANTS.KARMA_PP, comment.body, re.IGNORECASE) is not None:
             # Check if author is not rewarding themselves
             if not comment.author == comment.parent().author:
                 # process remaining checks
@@ -109,7 +109,7 @@ def process_commands(comment, is_mod, database):
             else:
                 response.cannot_reward_yourself_comment(comment)
         # If comment says Karma--
-        elif CONSTANTS.KARMA_MM in comment.body.upper():
+        elif re.search(CONSTANTS.KARMA_MM, comment.body, re.IGNORECASE) is not None:
             response.karma_subtract_failed(comment)
 
         # Close submission
@@ -130,11 +130,11 @@ def process_commands(comment, is_mod, database):
     else:
         # Mods commands will be executed without checks
         # Increase Karma
-        if CONSTANTS.KARMA_PP in comment.body.upper():
+        if re.search(CONSTANTS.KARMA_PP, comment.body, re.IGNORECASE) is not None:
             increment_karma(comment)
             response.karma_rewarded_comment(comment)
         # Decrease Karma
-        elif CONSTANTS.KARMA_MM in comment.body.upper():
+        elif re.search(CONSTANTS.KARMA_MM, comment.body, re.IGNORECASE) is not None:
             decrement_karma(comment)
             response.karma_subtract_comment(comment)
         # Close Submission
