@@ -78,8 +78,14 @@ def comment_blacklist_search_result(keyword, blacklist, comment_or_submission):
         response_text = "The user *" + keyword + "* has been found on blacklist " + str(len(blacklist)) + " "
         response_text = response_text + "time(s). The links for each time when the user appeared in blacklist are:\n\n "
         for item in blacklist:
+            # Url of card/s
             response_text = response_text + "[" + item.labels[
-                0].name + ": " + item.name + "](" + item.short_url + ")\n\n "
+                0].name + ": " + item.name + "](" + item.short_url + ")\n\n"
+            # Checks the description for offense and add them to comment
+            desc_list = item.desc.split("\n\n")
+            match = [element for element in desc_list if "offense" in element.lower()]
+            for element in match:
+                response_text += element + "\n\n"
         response_text = response_text + "Please check each link to verify. "
     else:
         response_text = "The bot has performed a search and has determined that the user *\"" + keyword + "\"* is not "
