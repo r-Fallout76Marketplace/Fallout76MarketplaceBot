@@ -94,9 +94,13 @@ class MarketplaceDatabase:
             comment = CONFIG.reddit.comment(line.strip()).refresh()
             self.awarder_list.append(awardeeawarder.AwardeeAwarder(comment))
         self.awarder_list.sort(key=lambda awardee_awarder_l: awardee_awarder_l.awarder.name, reverse=True)
+        print("Comments imported")
 
     # exporting all the comment IDs to a file so all comments can be imported again
     def export_to_txt(self, awarder_db_file):
+        # Bring seek to start so it rewrites old content
+        awarder_db_file.seek(0)
         for awardee_awarder_list_obj in self.awarder_list:
             awarder_db_file.write(awardee_awarder_list_obj.comment.id + "\n")
-
+        awarder_db_file.truncate()
+        print("Comments exported")

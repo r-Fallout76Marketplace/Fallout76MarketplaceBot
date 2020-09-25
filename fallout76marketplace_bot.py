@@ -39,7 +39,7 @@ def refresh_memory():
         print(tb)
 
 
-schedule.every(3).hours.do(refresh_memory)
+schedule.every(5).hours.do(refresh_memory)
 
 print("The bot has started running...")
 
