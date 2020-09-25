@@ -1,7 +1,6 @@
 # Replies to comment with text=body
 def reply(comment_or_submission, body):
     response = body + "\n\n ^(This action was performed by a bot, please contact the mods for any questions.)"
-    response = response + " ^(If you receive this more than once please ignore the comment.)"
     new_comment = comment_or_submission.reply(response)
     new_comment.mod.distinguish(how="yes")
 
@@ -56,7 +55,7 @@ def karma_subtract_failed(comment):
 def close_submission_comment(submission, time_expired):
     comment_body = "The submission has been closed and comments have been locked. "
     if time_expired:
-        comment_body = comment_body + "All submission after 3 days gets locked automatically. "
+        comment_body = comment_body + "**All trading submission gets locked automatically after 3 days.** "
     comment_body = comment_body + "Please contact mods, if you want to open the submission."
     reply(submission, comment_body)
 
@@ -86,12 +85,12 @@ def comment_blacklist_search_result(keyword, blacklist, comment_or_submission):
             match = [element for element in desc_list if "offense" in element.lower()]
             for element in match:
                 response_text += element + "\n\n"
-        response_text = response_text + "Please check each link to verify. "
+        response_text = response_text + "^(Please check each link to verify.)"
     else:
         response_text = "The bot has performed a search and has determined that the user *\"" + keyword + "\"* is not "
         response_text = response_text + "in present in our blacklist.\n\n^(Please take precautions if the user account "
-        response_text = response_text + "is very new or has low trade karma. You may also check their gamertag using "
-        response_text = response_text + "the bot command (See example in Automoderator comment\).) "
+        response_text = response_text + "is very new, has low trade karma or actively delete submissions/comments. "
+        response_text = response_text + " You may also check their gamertag using the bot commands (see Automod pinned comment). "
         response_text = response_text + "^(If you are doing a high value trade, consider using an official courier. "
         response_text = response_text + "You can find links to all couriers in the subreddit wiki or sidebar.)"
     reply(comment_or_submission, response_text)
