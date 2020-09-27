@@ -63,9 +63,9 @@ while True:
             marketplace_database.load_submission(submission)
     except Exception:
         # Sends a message to mods in case of error
-		if not message_sent:
-			tb = traceback.format_exc()
-			CONFIG.reddit.redditor("is_fake_Account").message(CONFIG.subreddit_name, tb,
-															  from_subreddit=CONFIG.subreddit_name)
-			print(tb)
-			message_sent = True
+        if not message_sent:
+            tb = traceback.format_exc()
+            CONFIG.reddit.redditor("is_fake_Account").message(CONFIG.subreddit_name, tb,
+                                                              from_subreddit=CONFIG.subreddit_name)
+            print(tb)
+            message_sent = True
