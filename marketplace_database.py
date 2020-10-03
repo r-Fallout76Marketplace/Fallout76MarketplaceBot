@@ -26,8 +26,10 @@ def load_comment(comment, database, is_explicit_call):
         return None
     # Checks in blacklist for both curly brackets keyword and author of comment
     trello_blacklist.check_comment_in_blacklist(comment, is_explicit_call)
-    # Process the commands in comment, such as karma++ or !close
-    karma_system.process_commands(comment, is_mod(comment.author), database)
+    # Don't process karma commands if bot is explicitly mentioned
+    if not is_explicit_call:
+        # Process the commands in comment, such as karma++ or !close
+        karma_system.process_commands(comment, is_mod(comment.author), database)
 
 
 def load_submission(submission):
