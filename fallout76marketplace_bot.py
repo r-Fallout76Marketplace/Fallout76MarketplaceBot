@@ -1,6 +1,7 @@
 import traceback
 
 import praw
+import prawcore
 import schedule
 
 import time
@@ -74,7 +75,10 @@ while True:
         # Sends a message to mods in case of error
         if not message_sent:
             tb = traceback.format_exc()
-            CONFIG.reddit.redditor("is_fake_Account").message(CONFIG.subreddit_name, tb,
+            try:
+                CONFIG.reddit.redditor("is_fake_Account").message(CONFIG.subreddit_name, tb,
                                                               from_subreddit=CONFIG.subreddit_name)
+            except prawcore.ServerError:
+                pass
             print(tb)
             message_sent = True
