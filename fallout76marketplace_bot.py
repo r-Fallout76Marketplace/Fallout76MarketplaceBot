@@ -1,5 +1,6 @@
 import traceback
 
+import praw
 import schedule
 
 import time
@@ -14,6 +15,8 @@ subreddit = CONFIG.reddit.subreddit(CONFIG.subreddit_name)
 comment_stream = subreddit.stream.comments(pause_after=-1, skip_existing=True)
 # Gets 100 historical submission
 submission_stream = subreddit.stream.submissions(pause_after=-1, skip_existing=True)
+# inbox stream
+inbox_stream = praw.models.util.stream_generator(CONFIG.reddit.inbox.mentions, pause_after=-1, skip_existing=True)
 
 # Creating Marketplace Database object
 database = marketplace_database.MarketplaceDatabase()
@@ -54,13 +57,19 @@ while True:
         for comment in comment_stream:
             if comment is None:
                 break
-            marketplace_database.load_comment(comment, database)
+            marketplace_database.load_comment(comment, database, False)
 
-        # Gets posts and if it receives None, it switches to comments
+        # Gets posts and if it receives None, it switches to mentions
         for submission in submission_stream:
             if submission is None:
                 break
             marketplace_database.load_submission(submission)
+
+        # Gets mentions and if it receives None, it switches to comments
+        for mentions in inbox_stream:
+            if mentions is None:
+                break
+            marketplace_database.load_comment(mentions, database, True)
     except Exception:
         # Sends a message to mods in case of error
         if not message_sent:

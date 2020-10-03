@@ -1,8 +1,16 @@
+import prawcore
+
+import CONFIG
+
+
 # Replies to comment with text=body
 def reply(comment_or_submission, body):
     response = body + "\n\n ^(This action was performed by a bot, please contact the mods for any questions.)"
     new_comment = comment_or_submission.reply(response)
-    new_comment.mod.distinguish(how="yes")
+    try:
+        new_comment.mod.distinguish(how="yes")
+    except prawcore.exceptions.Forbidden:
+        pass
 
 
 # Give the parent comment karma
@@ -70,8 +78,15 @@ def close_submission_failed(comment, is_trading_post):
     reply(comment, comment_body)
 
 
-# comments the blacklist search result
-def comment_blacklist_search_result(keyword, blacklist, comment_or_submission):
+# Adds disclaimer text in the comment
+def add_disclaimer(response_text, comment_or_submission):
+    response_text += "\n\n[See disclaimer]"
+    response_text += "(https://www.reddit.com/user/Vault-TecTradingCo/comments/j497xo" \
+                     "/disclaimer_for_uvaulttectradingco_bot/) "
+    return response_text
+
+
+def comment_blacklist_search_result(keyword, blacklist, is_explicit_call, comment_or_submission):
     response_text = "Error! Please message mods!"
     if len(blacklist) > 0:
         response_text = "The user *" + keyword + "* has been found on blacklist " + str(len(blacklist)) + " "
@@ -93,4 +108,6 @@ def comment_blacklist_search_result(keyword, blacklist, comment_or_submission):
         response_text = response_text + " You may also check their gamertag using the bot commands (see Automod pinned comment). "
         response_text = response_text + "^(If you are doing a high value trade, consider using an official courier. "
         response_text = response_text + "You can find links to all couriers in the subreddit wiki or sidebar.)"
+    if is_explicit_call and comment_or_submission.subreddit.display_name != CONFIG.subreddit_name:
+        response_text = add_disclaimer(response_text, comment_or_submission)
     reply(comment_or_submission, response_text)
