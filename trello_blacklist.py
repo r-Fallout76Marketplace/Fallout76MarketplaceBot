@@ -30,7 +30,9 @@ def check_comment_in_blacklist(comment, is_explicit_call):
 # Check for the author of submission in blacklist
 def check_submission_in_blacklist(submission):
     search_requested = False
-    search_in_blacklist(submission.author.name, search_requested, submission)
+    is_explicit_call = False
+    # Explicit calls cannot be made in submissions
+    search_in_blacklist(submission.author.name, search_requested, is_explicit_call, submission)
 
 
 # Checks if the search query is banned
