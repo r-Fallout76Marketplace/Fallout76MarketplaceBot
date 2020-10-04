@@ -78,7 +78,7 @@ while True:
             try:
                 CONFIG.reddit.redditor("is_fake_Account").message(CONFIG.subreddit_name, tb,
                                                               from_subreddit=CONFIG.subreddit_name)
-            except prawcore.ServerError:
+                print(tb)
+                message_sent = True
+            except Exception:
                 pass
-            print(tb)
-            message_sent = True

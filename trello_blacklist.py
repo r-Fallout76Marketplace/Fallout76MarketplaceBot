@@ -52,9 +52,12 @@ def banned_query(search_query):
 
 
 # Removes the archived cards from list
-def delete_archived_cards(search_result):
+def delete_archived_cards_and_check_desc(search_result, search_query):
     for card in search_result:
         if card.closed:
+            search_result.remove(card)
+        # Double check to make sure that search query is in card description
+        if search_query.lower() not in card.description.lower():
             search_result.remove(card)
     return search_result
 
@@ -64,8 +67,9 @@ def search_in_blacklist(search_query, search_requested, is_explicit_call, commen
     search_result = list()
     if not banned_query(search_query.lower()):
         try:
-            search_result = CONFIG.trello_client.search(query=search_query, cards_limit=10)
-            search_result = delete_archived_cards(search_result)
+            # escapes the special characters so the search result is exact not from wildcard
+            search_result = CONFIG.trello_client.search(query=re.escape(search_query), cards_limit=10)
+            search_result = delete_archived_cards_and_check_desc(search_result, search_query)
         except NotImplementedError:
             raise NotImplementedError(search_query)
 
@@ -73,7 +77,8 @@ def search_in_blacklist(search_query, search_requested, is_explicit_call, commen
     if len(search_result) == 0:
         # If search is requested only then the response is required
         if search_requested:
-            response.comment_blacklist_search_result(search_query, search_result, is_explicit_call, comment_or_submission)
+            response.comment_blacklist_search_result(search_query, search_result, is_explicit_call,
+                                                     comment_or_submission)
     # If search result returns something
     else:
         response.comment_blacklist_search_result(search_query, search_result, is_explicit_call, comment_or_submission)
