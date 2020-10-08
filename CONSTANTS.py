@@ -1,7 +1,7 @@
 # Keywords
-KARMA_PP = r"\+\+KARMA|KARMA\+\+"
+KARMA_PP = r"\++KARMA|KARMA\++"
 CLOSE = "!CLOSE"
-KARMA_MM = r"\-\-KARMA|KARMA\-\-"
+KARMA_MM = r"\-+KARMA|KARMA\-+"
 
 # User Flairs
 KARMA_ID = "8eac4bf0-a5b0-11ea-9ea7-0eb948cd201f"
