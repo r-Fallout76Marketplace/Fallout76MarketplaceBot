@@ -81,5 +81,11 @@ while True:
                                                                   from_subreddit=CONFIG.subreddit_name)
                 print(tb)
                 message_sent = True
+                # Refreshing Streams
             except Exception:
                 print("Error sending message to is_fake_Account")
+        # Refresh streams
+        comment_stream = subreddit.stream.comments(pause_after=-1, skip_existing=True)
+        submission_stream = subreddit.stream.submissions(pause_after=-1, skip_existing=True)
+        inbox_stream = praw.models.util.stream_generator(CONFIG.reddit.inbox.mentions, pause_after=-1,
+                                                         skip_existing=True)
