@@ -1,7 +1,6 @@
 import traceback
 
 import praw
-import prawcore
 import schedule
 
 import time
@@ -50,7 +49,7 @@ print("The bot has started running...")
 message_sent = False
 
 while True:
-    message_sent = False
+
     # Try catch to make sure bot doesn't go down during Error 503
     try:
         schedule.run_pending()
@@ -71,14 +70,16 @@ while True:
             if mentions is None:
                 break
             marketplace_database.load_comment(mentions, database, True)
+        # To make sure message gets sent only once
+        message_sent = False
     except Exception:
         # Sends a message to mods in case of error
         if not message_sent:
             tb = traceback.format_exc()
             try:
                 CONFIG.reddit.redditor("is_fake_Account").message(CONFIG.subreddit_name, tb,
-                                                              from_subreddit=CONFIG.subreddit_name)
+                                                                  from_subreddit=CONFIG.subreddit_name)
                 print(tb)
                 message_sent = True
             except Exception:
-                pass
+                print("Error sending message to is_fake_Account")
