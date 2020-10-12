@@ -1,9 +1,8 @@
+import time
 import traceback
 
 import praw
 import schedule
-
-import time
 
 import CONFIG
 import marketplace_database
