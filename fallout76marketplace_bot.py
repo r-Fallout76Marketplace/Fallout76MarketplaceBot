@@ -48,8 +48,7 @@ print("The bot has started running...")
 message_sent = False
 
 while True:
-
-    # Try catch to make sure bot doesn't go down during Error 503
+    # Try catch to make sure bot doesn't go down during Server errors or if internet goes down
     try:
         schedule.run_pending()
         # Gets comments and if it receives None, it switches to posts
