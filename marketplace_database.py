@@ -5,7 +5,7 @@ import praw
 
 import CONFIG
 import CONSTANTS
-import awardeeawarder
+import awardee_awarder
 import karma_system
 import response
 import trello_blacklist
@@ -73,7 +73,7 @@ class MarketplaceDatabase:
 
     def search(self, comment):
         # Creates object from comment
-        obj_awardee_awarder = awardeeawarder.AwardeeAwarder(comment)
+        obj_awardee_awarder = awardee_awarder.AwardeeAwarder(comment)
         # If name is between a and m
         if ord(obj_awardee_awarder.awarder.name[0]) in range(ord('A'), ord('N')):
             # compares to each object in list from start
@@ -94,7 +94,7 @@ class MarketplaceDatabase:
     def import_data(self, lines):
         for line in lines:
             comment = CONFIG.reddit.comment(line.strip()).refresh()
-            self.awarder_list.append(awardeeawarder.AwardeeAwarder(comment))
+            self.awarder_list.append(awardee_awarder.AwardeeAwarder(comment))
         self.awarder_list.sort(key=lambda awardee_awarder_l: awardee_awarder_l.awarder.name, reverse=True)
         print("Comments imported")
 
