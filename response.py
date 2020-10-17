@@ -105,9 +105,9 @@ def comment_blacklist_search_result(keyword, blacklist, is_explicit_call, commen
         response_text = "The bot has performed a search and has determined that the user *\"" + keyword + "\"* is not "
         response_text = response_text + "in present in our blacklist.\n\n^(Please take precautions if the user account "
         response_text = response_text + "is very new, has low trade karma or actively delete submissions/comments. "
-        response_text = response_text + " You may also check their gamertag using the bot commands (see Automod pinned comment). "
-        response_text = response_text + "^(If you are doing a high value trade, consider using an official courier. "
-        response_text = response_text + "You can find links to all couriers in the subreddit wiki or sidebar.)"
+        response_text = response_text + "You may also check their gamertag using the bot commands (see Automod pinned "
+        response_text = response_text + "comment. If you are doing a high value trade, consider using an official "
+        response_text = response_text + "courier. You can find links to all couriers in the subreddit wiki or sidebar.)"
     if is_explicit_call and comment_or_submission.subreddit.display_name != CONFIG.subreddit_name:
         response_text = add_disclaimer(response_text, comment_or_submission)
     reply(comment_or_submission, response_text)
