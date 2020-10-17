@@ -94,6 +94,9 @@ class MarketplaceDatabase:
     def import_data(self, lines):
         for line in lines:
             comment = CONFIG.reddit.comment(line.strip()).refresh()
+            # If comment is deleted, skip that comment
+            if comment.author is None:
+                continue
             self.awarder_list.append(awardee_awarder.AwardeeAwarder(comment))
         self.awarder_list.sort(key=lambda awardee_awarder_l: awardee_awarder_l.awarder.name, reverse=True)
         print("Comments imported")
