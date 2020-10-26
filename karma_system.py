@@ -22,8 +22,12 @@ def submission_flair_checks(comment):
 
 # Increments karma by 1
 def increment_karma(comment):
-    p_comment = comment.parent()
-    author_name = p_comment.author.name
+    try:
+        p_comment = comment.parent()
+        author_name = p_comment.author.name
+    except AttributeError:
+        response.karma_reward_failed(comment)
+        return -1
     # if the author has no flair
     if p_comment.author_flair_css_class == '' or p_comment.author_flair_css_class is None:
         # sets the flair to one
@@ -46,6 +50,7 @@ def increment_karma(comment):
         # Updates the user flair
         CONFIG.reddit.subreddit(CONFIG.subreddit_name).flair.set(author_name, text=str(user_flair),
                                                                  flair_template_id=CONSTANTS.KARMA_ID)
+        return 1
 
 
 # Decrements karma by 1
@@ -87,12 +92,12 @@ def process_karma_pp(comment, database):
         # searches for comment in database
         search_result = database.search(comment)
         if search_result is None:
-            increment_karma(comment)
-            response.karma_rewarded_comment(comment)
+            if increment_karma(comment) == 1:
+                response.karma_rewarded_comment(comment)
         else:
             response.already_rewarded_comment(comment, search_result)
     else:
-        response.karma_rewarded_failed(comment)
+        response.karma_trading_posts_only(comment)
 
 
 # Processes the comment body and determines what action to take

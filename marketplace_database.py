@@ -2,6 +2,7 @@ import re
 import time
 
 import praw
+import praw.exceptions
 
 import CONFIG
 import CONSTANTS
@@ -93,7 +94,12 @@ class MarketplaceDatabase:
     # import data from comment id to repopulate the list
     def import_data(self, lines):
         for line in lines:
-            comment = CONFIG.reddit.comment(line.strip()).refresh()
+            comment = CONFIG.reddit.comment(line.strip())
+            try:
+                comment = comment.refresh()
+            except praw.exceptions.ClientException:
+                print("Comment skipped due to client exception", line)
+                continue
             # If comment is deleted, skip that comment
             if comment.author is None:
                 continue

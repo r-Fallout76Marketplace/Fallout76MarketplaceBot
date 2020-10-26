@@ -35,22 +35,6 @@ def check_submission_in_blacklist(submission):
     search_in_blacklist(submission.author.name, search_requested, is_explicit_call, submission)
 
 
-# Checks if the search query is banned
-# e.g mods names and basic words
-def banned_query(search_query):
-    banned_words = ["byjiang", "jeranther"]
-    # Checks if search_query is in banned_word or banned word is part of it
-    for word in banned_words:
-        if word in search_query:
-            return True
-    # Check if search query is in moderator name
-    moderators_list = CONFIG.reddit.subreddit(CONFIG.subreddit_name).moderator()
-    for moderator in moderators_list:
-        if search_query in ('u/' + moderator.name).lower():
-            return True
-    return False
-
-
 # Removes the archived cards from list
 def delete_archived_cards_and_check_desc(search_result, search_query):
     for card in search_result:
@@ -65,13 +49,12 @@ def delete_archived_cards_and_check_desc(search_result, search_query):
 # Searches in trello board using trello api
 def search_in_blacklist(search_query, search_requested, is_explicit_call, comment_or_submission):
     search_result = list()
-    if not banned_query(search_query.lower()):
-        try:
-            # escapes the special characters so the search result is exact not from wildcard
-            search_result = CONFIG.trello_client.search(query=re.escape(search_query), cards_limit=10)
-            search_result = delete_archived_cards_and_check_desc(search_result, search_query)
-        except NotImplementedError:
-            raise NotImplementedError(search_query)
+    try:
+        # escapes the special characters so the search result is exact not from wildcard
+        search_result = CONFIG.trello_client.search(query=re.escape(search_query), cards_limit=10)
+        search_result = delete_archived_cards_and_check_desc(search_result, search_query)
+    except NotImplementedError:
+        raise NotImplementedError(search_query)
 
     # If nothing is returned by search result
     if len(search_result) == 0:

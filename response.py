@@ -6,8 +6,8 @@ import CONFIG
 # Replies to comment with text=body
 def reply(comment_or_submission, body):
     response = body + "\n\n ^(This action was performed by a bot, please contact the mods for any questions.)"
-    new_comment = comment_or_submission.reply(response)
     try:
+        new_comment = comment_or_submission.reply(response)
         new_comment.mod.distinguish(how="yes")
     except prawcore.exceptions.Forbidden:
         pass
@@ -24,7 +24,7 @@ def karma_rewarded_comment(comment):
 
 
 # Failed to give parent comment karma
-def karma_rewarded_failed(comment):
+def karma_trading_posts_only(comment):
     # Replies with comment
     comment_body = "Hi " + comment.author.name + "! You can only give karma to others under a trading post i.e "
     comment_body = comment_body + "submission with PS4, XB1 or PC flair. Please refer to wiki page for more information."
@@ -41,6 +41,12 @@ def already_rewarded_comment(comment, awardee_awarder_obj):
 # Cannot award yourself
 def cannot_reward_yourself_comment(comment):
     comment_body = "Hi " + comment.author.name + "! You cannot reward yourself karma."
+    reply(comment, comment_body)
+
+
+def karma_reward_failed(comment):
+    comment_body = "Hi " + comment.author.name + "! The bot cannot reward deleted submission or a comment. "
+    comment_body = comment_body + "Please reply to submission/comment that is not deleted."
     reply(comment, comment_body)
 
 
