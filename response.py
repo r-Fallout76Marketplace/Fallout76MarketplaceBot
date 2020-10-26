@@ -45,8 +45,8 @@ def cannot_reward_yourself_comment(comment):
 
 
 def karma_reward_failed(comment):
-    comment_body = "Hi " + comment.author.name + "! The bot cannot reward deleted submission or a comment. "
-    comment_body = comment_body + "Please reply to submission/comment that is not deleted."
+    comment_body = "Hi " + comment.author.name + "! The bot cannot reward karma to deleted submissions or comments. "
+    comment_body = comment_body + "Please reply to a submission/comment that has not been deleted."
     reply(comment, comment_body)
 
 
