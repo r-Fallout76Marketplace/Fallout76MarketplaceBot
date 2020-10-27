@@ -3,6 +3,8 @@ import re
 import CONFIG
 import response
 
+import trello
+
 
 # To extract the text from curly brackets
 def extract_frm_curly_brackets(input_text):
@@ -16,7 +18,7 @@ def extract_frm_curly_brackets(input_text):
 # Checks the blacklist for keywords that appear in comment
 # or checks for the author of comment
 def check_comment_in_blacklist(comment, is_explicit_call):
-    output = extract_frm_curly_brackets(comment.body)
+    output = extract_frm_curly_brackets(comment.body_html)
     search_requested = True
     # If there are no curly braces
     if output is not None:
@@ -38,6 +40,9 @@ def check_submission_in_blacklist(submission):
 # Removes the archived cards from list
 def delete_archived_cards_and_check_desc(search_result, search_query):
     for card in search_result:
+        if card.__class__ != trello.Card:
+            search_result.remove(card)
+            continue
         if card.closed:
             search_result.remove(card)
         # Double check to make sure that search query is in card description
