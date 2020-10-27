@@ -18,7 +18,7 @@ def extract_frm_curly_brackets(input_text):
 # Checks the blacklist for keywords that appear in comment
 # or checks for the author of comment
 def check_comment_in_blacklist(comment, is_explicit_call):
-    output = extract_frm_curly_brackets(comment.body_html)
+    output = extract_frm_curly_brackets(comment.body.replace("\\", ""))
     search_requested = True
     # If there are no curly braces
     if output is not None:
