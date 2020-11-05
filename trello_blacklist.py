@@ -46,7 +46,7 @@ def delete_archived_cards_and_check_desc(search_result, search_query):
         if card.closed:
             search_result.remove(card)
         # Double check to make sure that search query is in card description
-        if search_query.lower() not in card.description.lower():
+        if search_query.lower() not in card.description.lower().replace("\\", ""):
             search_result.remove(card)
     return search_result
 
